@@ -227,7 +227,59 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+
+        
+        best_v = float('-inf')
+        best_move = None
+        alpha = float('-inf')
+        beta = float('inf')
+
+        for action in gameState.getLegalActions(0):
+            successor = gameState.generateSuccessor(0, action)
+
+            v = self.get_value(successor, 1, self.depth, alpha, beta)
+            if v > best_v:
+                best_v = v
+                best_move = action
+            alpha = max(alpha, v)
+
+        return best_move
+    
         util.raiseNotDefined()
+    
+    def get_value(self, gameState: GameState, agentIndex: int, depth: int, alpha: int, beta: int):
+        if depth == 0 or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+
+        if agentIndex==0:
+            v = float('-inf')
+            actions = gameState.getLegalActions(0)
+            for action in actions:
+                successor = gameState.generateSuccessor(agentIndex, action)
+                next = self.get_value(successor, 1, depth, alpha, beta)
+                v = max(v, next)
+                if v > beta:
+                    return v
+                alpha = max(alpha, v)
+            
+        else:
+            v = float('inf')
+
+            # for agent in range(1, gameState.getNumAgents()):
+                
+            for action in gameState.getLegalActions(agentIndex):
+                successor = gameState.generateSuccessor(agentIndex, action)
+                # next = self.value(successor, 0, depth - 1)
+                if agentIndex != gameState.getNumAgents() - 1:
+                    next = self.get_value(successor, agentIndex+1, depth, alpha, beta)
+                else:
+                    next = self.get_value(successor, 0, depth-1, alpha, beta)
+
+                v = min(v, next)
+                if v < alpha:
+                    return v
+                beta = min(beta, v)
+        return v
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
