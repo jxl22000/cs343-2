@@ -294,6 +294,52 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
+
+        best_v = float('-inf')
+        best_move = None
+
+        for action in gameState.getLegalActions(0):
+            successor = gameState.generateSuccessor(0, action)
+
+            v = self.get_value(successor, 1, self.depth)
+            if v > best_v:
+                best_v = v
+                best_move = action
+
+        return best_move
+    
+    def get_value(self, gameState: GameState, agentIndex: int, depth: int):
+        if depth == 0 or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+
+        if agentIndex==0:
+            v = float('-inf')
+            actions = gameState.getLegalActions(0)
+            for action in actions:
+                successor = gameState.generateSuccessor(agentIndex, action)
+                next = self.get_value(successor, 1, depth)
+                v = max(v, next)
+            
+        else:
+            v = float('inf')
+
+            # for agent in range(1, gameState.getNumAgents()):
+                
+            v = 0
+            for action in gameState.getLegalActions(agentIndex):
+                successor = gameState.generateSuccessor(agentIndex, action)
+                
+                # next = self.value(successor, 0, depth - 1)
+                if agentIndex != gameState.getNumAgents() - 1:
+                    next = self.get_value(successor, agentIndex+1, depth)
+                else:
+                    next = self.get_value(successor, 0, depth-1)
+
+                # v = min(v, next)
+                v += next / len(gameState.getLegalActions(agentIndex))
+            
+        return v
+
         util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState: GameState):
