@@ -70,12 +70,22 @@ class ReflexAgent(Agent):
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
-        newFood = successorGameState.getFood()
-        newGhostStates = successorGameState.getGhostStates()
-        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        newFood = successorGameState.getFood().asList()
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        if len(newFood) == 0:
+            return 0
+        ghost_positions = successorGameState.getGhostPositions()
+        for ghost in ghost_positions:
+            if manhattanDistance(newPos, ghost) <= 1:
+                return float('-inf') # run
+        distance_to_food = [manhattanDistance(newPos, f) for f in newFood]
+        nearest_food = min(distance_to_food)
+        food_feature = 1 / (nearest_food * 10)
+        remaining_food_penalty = -len(newFood)
+        remaining_capsule_penalty = -len(successorGameState.getCapsules())
+
+        return food_feature + remaining_food_penalty + remaining_capsule_penalty
 
 def scoreEvaluationFunction(currentGameState: GameState):
     """
