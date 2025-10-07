@@ -357,10 +357,31 @@ def betterEvaluationFunction(currentGameState: GameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: Same ideas as weaker evalution function, but we can no
+    longer return -inf when there is a host nearby. Instead, deincentivize moving towards it
+    by increasing nearest_food, which reduces the return of this function.
+    Otherwise, just sum
+    1 / distance to nearest food, score, -1 * remaining food, and 1- * remaining capsules, because 
+    we want to incentivize moving towards food, winning, and eating food/capsules.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    currPos = currentGameState.getPacmanPosition()
+    currFood = currentGameState.getFood().asList()
+
+    distance_to_food = [manhattanDistance(currPos, f) for f in currFood]
+    if len (distance_to_food) == 0:
+        nearest_food = 1
+    else:
+        nearest_food = min(distance_to_food)
+    for ghost in currentGameState.getGhostPositions():
+        if manhattanDistance(currPos, ghost) <= 1:
+            nearest_food = float('inf') # run
+    food_feature = 1.0 / nearest_food
+    score_feature = currentGameState.getScore()
+    remaining_food_penalty = -len(currFood)
+    remaining_capsule_penalty = -len(currentGameState.getCapsules())
+    return food_feature + score_feature + remaining_food_penalty + remaining_capsule_penalty
 
 # Abbreviation
 better = betterEvaluationFunction
